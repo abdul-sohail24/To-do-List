@@ -1,9 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./style.css";
+
+// Getting Local Storage
+const getLocalData = () => {
+	const lists = localStorage.getItem("mytodolist");
+
+	if (lists) {
+		return JSON.parse(lists);
+	} else {
+		return [];
+	}
+};
 
 const Todo = () => {
 	const [inputData, setInputData] = useState("");
-	const [items, setItems] = useState([]);
+	const [items, setItems] = useState(getLocalData());
 
 	//Function for adding Items
 
@@ -11,10 +22,33 @@ const Todo = () => {
 		if (!inputData) {
 			alert("Please Fill the Data");
 		} else {
-			setItems([...items, inputData]);
+			const myNewInputData = {
+				id: new Date().getTime().toString(),
+				name: inputData,
+			};
+			setItems([...items, myNewInputData]);
+			setInputData("");
 		}
 	};
 
+	// Deleting Section
+
+	const deleteItem = (index) => {
+		const updatedItems = items.filter((curElem) => {
+			return curElem.id !== index;
+		});
+		setItems(updatedItems);
+	};
+
+	//Removing all elements
+	const removeAll = () => {
+		setItems([]);
+	};
+
+	//Adding Local Storage
+	useEffect(() => {
+		localStorage.setItem("mytodolist", JSON.stringify(items));
+	}, [items]);
 	return (
 		<>
 			<div className="main-div">
@@ -35,17 +69,28 @@ const Todo = () => {
 					</div>
 
 					<div className="showItems">
-						<div className="eachItem">
-							<h3>Banana</h3>
-							<div className="todo-btn">
-								<i className="fas fa-edit add-btn"></i>
-								<i className="fas fa-trash-alt add-btn"></i>
-							</div>
-						</div>
+						{items.map((curElem) => {
+							return (
+								<div className="eachItem" key={curElem.id}>
+									<h3>{curElem.name}</h3>
+									<div className="todo-btn">
+										<i className="fas fa-edit add-btn"></i>
+										<i
+											className="fas fa-trash-alt add-btn"
+											onClick={() => deleteItem(curElem.id)}
+										></i>
+									</div>
+								</div>
+							);
+						})}
 					</div>
 
 					<div className="showItems">
-						<button className="btn effect04" data-sm-link-text="Remove All">
+						<button
+							className="btn effect04"
+							data-sm-link-text="Remove All"
+							onClick={removeAll}
+						>
 							<span> CHECK LIST</span>
 						</button>
 					</div>
